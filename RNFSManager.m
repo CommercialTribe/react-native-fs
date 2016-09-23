@@ -20,6 +20,9 @@
 
 @end
 
+static completionHandler sessionCompletionHandler;
+
+
 @implementation RNFSManager
 
 @synthesize bridge = _bridge;
@@ -266,6 +269,8 @@ RCT_EXPORT_METHOD(downloadFile:(NSDictionary *)options
   params.progressDivider = progressDivider;
 
   params.completeCallback = ^(NSNumber* statusCode, NSNumber* bytesWritten) {
+    NSLog(@"completeCallback. Status: %d. Bytes: %d Job: %d", [statusCode integerValue], bytesWritten, jobId);
+
     NSMutableDictionary* result = [[NSMutableDictionary alloc] initWithDictionary: @{@"jobId": jobId,
                                                                                      @"statusCode": statusCode}];
     if (bytesWritten) {
@@ -453,6 +458,14 @@ RCT_EXPORT_METHOD(getFSInfo:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromise
            @"RNFSFileTypeRegular": NSFileTypeRegular,
            @"RNFSFileTypeDirectory": NSFileTypeDirectory
            };
+}
+
++ (void) setCompletionHandler:(completionHandler)handler {
+    sessionCompletionHandler = handler;
+}
+
++ (completionHandler) getCompletionHandler {
+    return sessionCompletionHandler;
 }
 
 @end

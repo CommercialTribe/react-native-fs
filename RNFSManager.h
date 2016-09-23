@@ -9,6 +9,11 @@
 #import "RCTBridgeModule.h"
 #import "RCTLog.h"
 
+typedef void (^completionHandler)();
+
 @interface RNFSManager : NSObject <RCTBridgeModule>
+
++ (void) setCompletionHandler:(completionHandler)handler;
++ (completionHandler) getCompletionHandler;
 
 @end

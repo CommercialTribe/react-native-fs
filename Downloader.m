@@ -1,4 +1,5 @@
 #import "Downloader.h"
+#import "RNFSManager.h"
 
 @implementation RNFSDownloadParams
 
@@ -14,6 +15,7 @@
 @property (retain) NSNumber* lastProgressValue;
 @property (retain) NSNumber* contentLength;
 @property (retain) NSNumber* bytesWritten;
+@property (retain) NSString* sessionIdentifier;
 
 @property (retain) NSFileHandle* fileHandle;
 
@@ -43,8 +45,11 @@
 
   NSURLSessionConfiguration *config;
   if (_params.background) {
-    NSString *uuid = [[NSUUID UUID] UUIDString];
-    config = [NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier:uuid];
+      NSLog(@"downloadFile BACKGROUND");
+
+    _sessionIdentifier = [[NSUUID UUID] UUIDString];
+    config = [NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier:_sessionIdentifier];
+    config.sessionSendsLaunchEvents = YES;
   } else {
     config = [NSURLSessionConfiguration defaultSessionConfiguration];
   }
@@ -88,6 +93,13 @@
 
 - (void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask didFinishDownloadingToURL:(NSURL *)location
 {
+
+  NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)downloadTask.response;
+  if (!_statusCode) {
+      _statusCode = [NSNumber numberWithLong:httpResponse.statusCode];
+      //@TODO: fetch _bytesWritten
+  }
+
   NSURL *destURL = [NSURL fileURLWithPath:_params.toFile];
   NSFileManager *fm = [NSFileManager defaultManager];
   NSError *error = nil;
@@ -102,6 +114,8 @@
 
 - (void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionTask *)downloadTask didCompleteWithError:(NSError *)error
 {
+    NSLog(@"didCompleteWithError");
+
   return _params.errorCallback(error);
 }
 
@@ -116,6 +130,17 @@
                                    }];
 
   return _params.errorCallback(error);
+}
+
+- (void)URLSessionDidFinishEventsForBackgroundURLSession:(NSURLSession *)session
+{
+    NSLog(@"URLSessionDidFinishEventsForBackgroundURLSession");
+    
+    completionHandler sessionCompletionHandler = [RNFSManager getCompletionHandler];
+    if (sessionCompletionHandler) {
+        [RNFSManager setCompletionHandler:nil];
+        sessionCompletionHandler();
+    }
 }
 
 @end
