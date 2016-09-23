@@ -331,6 +331,8 @@ RCT_EXPORT_METHOD(uploadFiles:(NSDictionary *)options
   params.headers = headers;
   params.fields = fields;
   params.method = method;
+  NSNumber* background = options[@"background"];
+  params.background = [background boolValue];
 
   params.completeCallback = ^(NSString* body, NSURLResponse *resp) {
 

@@ -17,11 +17,10 @@ typedef void (^UploadProgressCallback)(NSNumber*, NSNumber*);
 @property (copy) UploadErrorCallback errorCallback;         // Something gone wrong
 @property (copy) UploadBeginCallback beginCallback;         // Upload has started
 @property (copy) UploadProgressCallback progressCallback;   // Upload is progressing
-@property bool background;
-
+@property        bool background;
 @end
 
-@interface RNFSUploader : NSObject <NSURLConnectionDelegate>
+@interface RNFSUploader : NSObject <NSURLSessionDelegate, NSURLSessionDataDelegate>
 
 - (void)uploadFiles:(RNFSUploadParams*)params;
 - (void)stopUpload;
