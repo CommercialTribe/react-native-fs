@@ -96,7 +96,16 @@
   // send request
   [req setHTTPBody:reqBody];
 
-  NSURLSessionConfiguration *sessionConfiguration = [NSURLSessionConfiguration defaultSessionConfiguration];
+  // Add support for background session
+  NSURLSessionConfiguration *sessionConfiguration;
+    
+  if (_params.background) {
+    NSString *uuid = [[NSUUID UUID] UUIDString];
+    sessionConfiguration = [NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier:uuid];
+  } else {
+    sessionConfiguration = [NSURLSessionConfiguration defaultSessionConfiguration];
+  }
+    
   NSURLSession *session = [NSURLSession sessionWithConfiguration:sessionConfiguration delegate:(id)self delegateQueue:[NSOperationQueue mainQueue]];
   _task = [session dataTaskWithRequest:req completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
       NSString * str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];

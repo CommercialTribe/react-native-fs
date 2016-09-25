@@ -17,6 +17,7 @@ typedef void (^UploadProgressCallback)(NSNumber*, NSNumber*);
 @property (copy) UploadErrorCallback errorCallback;         // Something gone wrong
 @property (copy) UploadBeginCallback beginCallback;         // Upload has started
 @property (copy) UploadProgressCallback progressCallback;   // Upload is progressing
+@property bool background;
 
 @end
 
