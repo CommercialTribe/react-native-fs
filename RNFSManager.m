@@ -20,7 +20,7 @@
 
 @end
 
-static completionHandler sessionCompletionHandler;
+static NSMutableDictionary* sessionCompletionHandlers;
 
 
 @implementation RNFSManager
@@ -462,12 +462,35 @@ RCT_EXPORT_METHOD(getFSInfo:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromise
            };
 }
 
-+ (void) setCompletionHandler:(completionHandler)handler {
-    sessionCompletionHandler = handler;
++ (void)URLSessionDidFinishEventsForBackgroundURLSession:(NSURLSession *)session
+{
+    NSString * sessionId = session.configuration.identifier;
+    NSLog(@"URLSessionDidFinishEventsForBackgroundURLSession start %@", sessionId);
+    completionHandler sessionCompletionHandler = [RNFSManager getCompletionHandlerForSessionId: sessionId];
+    if (sessionCompletionHandler) {
+        [NSThread sleepForTimeInterval: 10.0];
+        NSLog(@"URLSessionDidFinishEventsForBackgroundURLSession calling completion handler %@", sessionId);
+        [RNFSManager setCompletionHandler:nil forSessionId: sessionId];
+        sessionCompletionHandler();
+    }
 }
 
-+ (completionHandler) getCompletionHandler {
-    return sessionCompletionHandler;
++ (void) setCompletionHandler:(completionHandler)handler forSessionId:(NSString*) sessionId {
+    if (! sessionCompletionHandlers) {
+        sessionCompletionHandlers = [[NSMutableDictionary alloc] init];
+    }
+    if (handler == nil) {
+        [sessionCompletionHandlers removeObjectForKey:sessionId];
+    } else {
+        [sessionCompletionHandlers setObject:handler forKey:sessionId];
+    }
+}
+
++ (completionHandler) getCompletionHandlerForSessionId:(NSString*)sessionId {
+    if (! sessionCompletionHandlers) {
+        return nil;
+    }
+    return [sessionCompletionHandlers objectForKey:sessionId];
 }
 
 @end
