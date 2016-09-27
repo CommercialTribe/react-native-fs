@@ -351,7 +351,8 @@ var RNFS = {
       files: options.files,
       headers: options.headers || {},
       fields: options.fields || {},
-      method: options.method || 'POST'
+      method: options.method || 'POST',
+      background: !!options.background,
     };
 
     return {
