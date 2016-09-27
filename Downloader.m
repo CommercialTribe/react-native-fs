@@ -30,7 +30,7 @@
   _bytesWritten = 0;
 
   NSURL* url = [NSURL URLWithString:_params.fromUrl];
-
+  NSURL* logURLWithoutQuery = [[NSURL alloc] initWithScheme:[url scheme] host:[url host] path:[url path]];
   [[NSFileManager defaultManager] createFileAtPath:_params.toFile contents:nil attributes:nil];
   _fileHandle = [NSFileHandle fileHandleForWritingAtPath:_params.toFile];
 
@@ -45,12 +45,12 @@
 
   NSURLSessionConfiguration *config;
   if (_params.background) {
-      NSLog(@"downloadFile BACKGROUND");
-
     _sessionIdentifier = [[NSUUID UUID] UUIDString];
+    NSLog(@"---CREATING BG DOWNLOAD of %@ in session %@", [logURLWithoutQuery absoluteString], _sessionIdentifier);
     config = [NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier:_sessionIdentifier];
     config.sessionSendsLaunchEvents = YES;
   } else {
+    NSLog(@"---CREATING FG DOWNLOAD %@", [logURLWithoutQuery absoluteString]);
     config = [NSURLSessionConfiguration defaultSessionConfiguration];
   }
 
@@ -134,13 +134,7 @@
 
 - (void)URLSessionDidFinishEventsForBackgroundURLSession:(NSURLSession *)session
 {
-    NSLog(@"URLSessionDidFinishEventsForBackgroundURLSession");
-    
-    completionHandler sessionCompletionHandler = [RNFSManager getCompletionHandler];
-    if (sessionCompletionHandler) {
-        [RNFSManager setCompletionHandler:nil];
-        sessionCompletionHandler();
-    }
+    [RNFSManager URLSessionDidFinishEventsForBackgroundURLSession:session];
 }
 
 @end

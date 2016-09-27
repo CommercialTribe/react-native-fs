@@ -38,7 +38,6 @@
   }
   
   if (_params.background) {
-    NSLog(@"---CREATING BACKGROUND TASK---");
     NSFileManager *fileManager = [NSFileManager defaultManager];
     NSDictionary *file = [_params.files objectAtIndex:0];
     NSString *filepath = file[@"filepath"];
@@ -49,7 +48,7 @@
     _task = [self createBackgroundUploadTaskFromReq:req fromFilePath:filepath];
   }
   else{
-    NSLog(@"---CREATING FOREGROUND TASK---");
+    NSLog(@"---CREATING FG UPLOAD");
     NSString *formBoundaryString = [self generateBoundaryString];
     NSString *contentType = [NSString stringWithFormat:@"multipart/form-data; boundary=%@", formBoundaryString];
     [req setValue:contentType forHTTPHeaderField:@"Content-Type"];
@@ -140,6 +139,7 @@
 {
     NSURL *fileUrl = [NSURL fileURLWithPath:filepath];
     NSString *uuid = [[NSUUID UUID] UUIDString];
+    NSLog(@"---CREATING BG UPLOAD TASK of file %@ in session %@", filepath, uuid);
     NSURLSessionConfiguration *sessionConfiguration = [NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier:uuid];
     sessionConfiguration.sessionSendsLaunchEvents = YES;
     NSURLSession *session = [NSURLSession sessionWithConfiguration:sessionConfiguration delegate:(id)self delegateQueue:[NSOperationQueue mainQueue]];
@@ -192,13 +192,7 @@
 
 - (void)URLSessionDidFinishEventsForBackgroundURLSession:(NSURLSession *)session
 {
-    NSLog(@"URLSessionDidFinishEventsForBackgroundURLSession");
-    
-    completionHandler sessionCompletionHandler = [RNFSManager getCompletionHandler];
-    if (sessionCompletionHandler) {
-        [RNFSManager setCompletionHandler:nil];
-        sessionCompletionHandler();
-    }
+    [RNFSManager URLSessionDidFinishEventsForBackgroundURLSession:session];
 }
 
 - (NSString *)generateBoundaryString

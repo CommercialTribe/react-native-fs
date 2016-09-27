@@ -13,7 +13,8 @@ typedef void (^completionHandler)();
 
 @interface RNFSManager : NSObject <RCTBridgeModule>
 
-+ (void) setCompletionHandler:(completionHandler)handler;
-+ (completionHandler) getCompletionHandler;
++ (void) setCompletionHandler:(completionHandler)handler forSessionId:(NSString*) sessionId;
++ (completionHandler) getCompletionHandlerForSessionId:(NSString*)sessionId;
++ (void)URLSessionDidFinishEventsForBackgroundURLSession:(NSURLSession *)session;
 
 @end
