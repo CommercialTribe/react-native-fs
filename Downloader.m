@@ -18,7 +18,7 @@
 @property (retain) NSString* sessionIdentifier;
 
 @property (retain) NSFileHandle* fileHandle;
-
+@property (retain) NSMutableDictionary* responseData;
 @end
 
 @implementation RNFSDownloader
@@ -107,8 +107,22 @@
   [fm moveItemAtURL:location toURL:destURL error:&error];
   if (error) {
     NSLog(@"RNFS download: unable to move tempfile to destination. %@, %@", error, error.userInfo);
+    return _params.errorCallback(error);
   }
-
+  NSMutableData *responseForTask = [_responseData objectForKey:@(downloadTask.taskIdentifier)];
+  NSString *body = @"";
+  if (responseForTask) {
+    body = [[NSString alloc] initWithData:responseForTask encoding:NSUTF8StringEncoding];
+    NSLog(@"---WITH DATA---");
+    [_responseData removeObjectForKey:@(downloadTask.taskIdentifier)];
+  }
+  if(!_statusCode || ![_statusCode isEqualToNumber:[NSNumber numberWithInt:200]]){
+    NSString *errorDomain = [RNFSManager getErrorDomain];
+    NSMutableDictionary *userInfo = [[NSMutableDictionary alloc] init];
+    [userInfo setObject:body forKey:NSLocalizedDescriptionKey];
+    NSError *serverError = [NSError errorWithDomain:errorDomain code:500 userInfo:userInfo];
+    return _params.errorCallback(serverError);
+  }
   return _params.completeCallback(_statusCode, _bytesWritten);
 }
 
@@ -117,6 +131,17 @@
     NSLog(@"didCompleteWithError");
 
   return _params.errorCallback(error);
+}
+
+- (void)URLSession:(NSURLSession *)session dataTask:(NSURLSessionDataTask *)dataTask didReceiveData:(NSData *)data {
+    NSLog(@"---RECEIVED DATA---");
+    NSMutableData *responseData = [_responseData objectForKey:@(dataTask.taskIdentifier)];
+    if (!responseData) {
+        responseData = [NSMutableData dataWithData:data];
+        [_responseData setObject:responseData forKey:@(dataTask.taskIdentifier)];
+    } else {
+        [responseData appendData:data];
+    }
 }
 
 - (void)stopDownload

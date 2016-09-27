@@ -58,6 +58,7 @@
     [self setBodyFormFields:reqBody withBoundaryData:formBoundaryData];
     NSError* error = [self setBodyFiles:reqBody withBoundaryData:formBoundaryData];
     if(error != nil){
+        
       return _params.errorCallback(error);
     }
     NSData* end = [[NSString stringWithFormat:@"--%@--\r\n", formBoundaryString] dataUsingEncoding:NSUTF8StringEncoding];
@@ -153,12 +154,20 @@
     return _params.errorCallback(error);
   }
     NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)task.response;
+    NSNumber *statusCode = [NSNumber numberWithUnsignedInteger:((NSHTTPURLResponse *)httpResponse).statusCode];
     NSMutableData *responseForTask = [_responseData objectForKey:@(task.taskIdentifier)];
     NSString *body = @"";
     if (responseForTask) {
         body = [[NSString alloc] initWithData:responseForTask encoding:NSUTF8StringEncoding];
         NSLog(@"---WITH DATA---");
         [_responseData removeObjectForKey:@(task.taskIdentifier)];
+    }
+    if(!statusCode || ![statusCode isEqualToNumber:[NSNumber numberWithInt:200]]){
+        NSString *errorDomain = [RNFSManager getErrorDomain];
+        NSMutableDictionary *userInfo = [[NSMutableDictionary alloc] init];
+        [userInfo setObject:body forKey:NSLocalizedDescriptionKey];
+        NSError *serverError = [NSError errorWithDomain:errorDomain code:500 userInfo:userInfo];
+        return _params.errorCallback(serverError);
     }
    return _params.completeCallback(body, httpResponse);
 }
