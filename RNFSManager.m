@@ -21,7 +21,7 @@
 @end
 
 static NSMutableDictionary* sessionCompletionHandlers;
-
+static NSString* errorDomain;
 
 @implementation RNFSManager
 
@@ -491,6 +491,14 @@ RCT_EXPORT_METHOD(getFSInfo:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromise
         return nil;
     }
     return [sessionCompletionHandlers objectForKey:sessionId];
+}
+
++ (void) setErrorDomain:(NSString *)domain {
+    errorDomain = domain;
+}
+
++ (NSString *) getErrorDomain {
+    return errorDomain;
 }
 
 @end

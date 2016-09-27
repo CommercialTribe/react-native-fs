@@ -16,5 +16,7 @@ typedef void (^completionHandler)();
 + (void) setCompletionHandler:(completionHandler)handler forSessionId:(NSString*) sessionId;
 + (completionHandler) getCompletionHandlerForSessionId:(NSString*)sessionId;
 + (void)URLSessionDidFinishEventsForBackgroundURLSession:(NSURLSession *)session;
++ (void) setErrorDomain:(NSString *)domain;
++ (NSString *) getErrorDomain;
 
 @end
