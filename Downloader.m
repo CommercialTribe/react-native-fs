@@ -117,9 +117,12 @@
     [_responseData removeObjectForKey:@(downloadTask.taskIdentifier)];
   }
   if(!_statusCode || ![_statusCode isEqualToNumber:[NSNumber numberWithInt:200]]){
+    NSString *errorDescription = [NSString stringWithFormat:@"Status Code: %d. Body: %@",
+                                      _statusCode != nil ? [_statusCode integerValue] : 0,
+                                      body];
     NSString *errorDomain = [RNFSManager getErrorDomain];
     NSMutableDictionary *userInfo = [[NSMutableDictionary alloc] init];
-    [userInfo setObject:body forKey:NSLocalizedDescriptionKey];
+    [userInfo setObject:errorDescription forKey:NSLocalizedDescriptionKey];
     NSError *serverError = [NSError errorWithDomain:errorDomain code:500 userInfo:userInfo];
     return _params.errorCallback(serverError);
   }
