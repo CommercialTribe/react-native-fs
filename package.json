@@ -1,6 +1,6 @@
 {
   "name": "react-native-fs",
-  "version": "2.0.1-rc.2.ct.1",
+  "version": "2.0.1-rc.2.ct.2",
   "description": "Native filesystem access for react-native",
   "main": "FS.common.js",
   "scripts": {
@@ -29,7 +29,7 @@
   },
   "devDependencies": {
     "flow-bin": "0.27.0",
-    "react": "^15.2.1",
-    "react-native": "^0.30.0"
+    "react": "15.4.2",
+    "react-native": "0.42.3"
   }
 }

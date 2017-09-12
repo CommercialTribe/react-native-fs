@@ -82,7 +82,7 @@
       NSNumber* progress = [NSNumber numberWithUnsignedInt: floor(doublePercents)];
       if ([progress unsignedIntValue] % [_params.progressDivider integerValue] == 0) {
         if (([progress unsignedIntValue] != [_lastProgressValue unsignedIntValue]) || ([_bytesWritten unsignedIntegerValue] == [_contentLength longValue])) {
-          NSLog(@"---Progress callback EMIT--- %zu", [progress unsignedIntValue]);
+          NSLog(@"---Progress callback EMIT--- %@", @([progress unsignedIntValue]));
           _lastProgressValue = [NSNumber numberWithUnsignedInt:[progress unsignedIntValue]];
           return _params.progressCallback(_contentLength, _bytesWritten);
         }
@@ -117,8 +117,8 @@
     [_responseData removeObjectForKey:@(downloadTask.taskIdentifier)];
   }
   if(!_statusCode || ![_statusCode isEqualToNumber:[NSNumber numberWithInt:200]]){
-    NSString *errorDescription = [NSString stringWithFormat:@"Status Code: %d. Body: %@",
-                                      _statusCode != nil ? [_statusCode integerValue] : 0,
+    NSString *errorDescription = [NSString stringWithFormat:@"Status Code: %ld. Body: %@",
+                                      (long)(_statusCode != nil ? [_statusCode integerValue] : 0),
                                       body];
     NSString *errorDomain = [RNFSManager getErrorDomain];
     NSMutableDictionary *userInfo = [[NSMutableDictionary alloc] init];
@@ -152,7 +152,7 @@
   [_task cancel];
 
   NSError *error = [NSError errorWithDomain:@"RNFS"
-                                       code:@"Aborted"
+                                       code:NSURLErrorCancelled
                                    userInfo:@{
                                      NSLocalizedDescriptionKey: @"Download has been aborted"
                                    }];
